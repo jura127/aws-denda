@@ -60,7 +60,7 @@ if (isset($_SESSION['add_to_cart_success']) && $_SESSION['add_to_cart_success'])
 
 <header class="grid-header">
     <div class="logo-container">
-        <img src="https://erronkadenda.s3.eu-south-2.amazonaws.com/cajaconcartas-modified.jpg" alt="Logo Tienda de Magia" class="logo">
+        <img src="https://erronkadenda.s3.eu-south-2.amazonaws.com/cajaconcartas.jpg" alt="Logo Tienda de Magia" class="logo">
     </div>
     <nav class="main-nav">
         <ul>
