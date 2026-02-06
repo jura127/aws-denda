@@ -1,8 +1,14 @@
 <?php
+// 1. Cargar configuración y sesión (vital para AWS)
+if (!file_exists('config.php')) {
+    die("Error: El archivo 'config.php' no existe. Créalo con tus datos de AWS RDS.");
+}
 require_once 'config.php';
+
 // --------------------
 // INCLUSIÓN DE CLASES
 // --------------------
+// Asegúrate de que las rutas sean correctas según tu estructura de carpetas
 require_once __DIR__ . '/klaseak/com/leartik/daw24unju/produktuak/produktuak.php';
 require_once __DIR__ . '/klaseak/com/leartik/daw24unju/produktuak/produktuak_db.php';
 require_once __DIR__ . '/klaseak/com/leartik/daw24unju/kategoriak/kategoriak.php';
@@ -11,19 +17,22 @@ require_once __DIR__ . '/klaseak/com/leartik/daw24unju/kategoriak/kategoriak_db.
 // --------------------
 // OBTENER Y AGRUPAR DATOS
 // --------------------
+// Obtenemos los datos de AWS RDS
 $productos_todos = ProductosDB::selectProduktuak() ?? [];
 $categorias_list = CategoriasDB::selectCategorias() ?? [];
 
 $productos_por_categoria = [];
 
+// Preparamos el array de categorías usando el ID como llave
 foreach ($categorias_list as $cat) {
-    $id_cat = $cat->getId();
+    $id_cat = $cat->getId(); // Asegúrate de que este ID coincida con el de MySQL
     $productos_por_categoria[$id_cat] = [
         'nombre' => $cat->getNombre(),
         'productos' => []
     ];
 }
 
+// Repartimos los productos en sus respectivas categorías
 foreach ($productos_todos as $p) {
     $id_cat = $p->getIdCategoria();
     
@@ -32,16 +41,17 @@ foreach ($productos_todos as $p) {
             'id' => $p->getIdProducto(),
             'nombre' => $p->getTipoProducto(),
             'descripcion' => $p->getDescripcion(),
-            'precio' => $p->getPrecio(),
+            'precio' => (float)$p->getPrecio(),
             'tiene_opc_añadir_cesta' => $p->getTieneOpcAñadirCesta(),
             'ofertas' => $p->getOfertas(),
             'novedades' => $p->getNovedades(),
             'imagen_url' => 'img/placeholder.png' 
         ];
 
+        // Lógica de precios para ofertas
         if ($producto_data['ofertas']) {
-            $producto_data['precio_original'] = $p->getPrecio();
-            $producto_data['precio_oferta'] = $p->getPrecio() * 0.8; 
+            $producto_data['precio_original'] = $producto_data['precio'];
+            $producto_data['precio_oferta'] = $producto_data['precio'] * 0.8; // 20% descuento
         }
 
         $productos_por_categoria[$id_cat]['productos'][] = $producto_data;
@@ -72,9 +82,9 @@ foreach ($productos_todos as $p) {
             <li><a href="mediateka/mediateka.html">Mediateka</a></li>
             <li><a href="cesta.php">Cesta</a></li>
             <li>
-                <?php if (isset($esta_logueado) && $esta_logueado): ?>
+                <?php if ($esta_logueado): ?>
                     <div class="user-info-nav">
-                        <a href="login.php?action=logout" class="logout-link" title="Cerrar Sesión">Logout</a>
+                        <a href="login.php?action=logout" class="logout-link">Logout</a>
                         <span class="user-name">(<?= htmlspecialchars($nombre_usuario) ?>)</span>
                     </div>
                 <?php else: ?>
@@ -89,17 +99,19 @@ foreach ($productos_todos as $p) {
     <h1>Catálogo Completo</h1>
 
     <div class="search-wrapper">
-        <label for="buscar-nombre">Buscar nombres:</label>
-        <input type="text" id="buscar-nombre" placeholder="Mari..." autocomplete="off">
+        <label for="buscar-nombre">Buscar productos:</label>
+        <input type="text" id="buscar-nombre" placeholder="Escribe para buscar..." autocomplete="off">
         <div id="sugerencias"></div>
     </div>
     
     <?php if (empty($productos_todos)): ?>
         <div class="section-container">
-            <p class="no-productos">Actualmente no hay productos en el catálogo.</p>
+            <p class="no-productos">Actualmente no hay productos en el catálogo de AWS.</p>
         </div>
     <?php else: ?>
         <?php foreach ($productos_por_categoria as $categoria): 
+            if (empty($categoria['productos'])) continue; // No mostramos categorías vacías
+            
             $nombre_cat = $categoria['nombre'];
             $productos_en_cat = $categoria['productos'];
         ?>
@@ -107,29 +119,25 @@ foreach ($productos_todos as $p) {
                 <h2><?= htmlspecialchars($nombre_cat) ?></h2>
                 <div class="productos-seccion-grid">
                     
-                    <?php if (empty($productos_en_cat)): ?>
-                        <p class="no-productos">No hay productos disponibles en esta sección.</p>
-                    <?php else: ?>
-                        <?php foreach ($productos_en_cat as $producto): ?>
-                            <div class="producto-card" data-nombre="<?= strtolower(htmlspecialchars($producto['nombre'])) ?>">
-                                <p class="producto-nombre"><?= htmlspecialchars($producto['nombre']) ?></p>
-                                
-                                <div class="prices-container">
-                                    <?php if ($producto['ofertas']): ?>
-                                        <del class="original-price"><?= number_format($producto['precio_original'], 2) ?> €</del>
-                                        <span class="sale-price"><?= number_format($producto['precio_oferta'], 2) ?> €</span>
-                                    <?php else: ?>
-                                        <p class="producto-precio"><?= number_format($producto['precio'], 2) ?> €</p>
-                                    <?php endif; ?>
-                                </div>
+                    <?php foreach ($productos_en_cat as $producto): ?>
+                        <div class="producto-card" data-nombre="<?= strtolower(htmlspecialchars($producto['nombre'])) ?>">
+                            <p class="producto-nombre"><?= htmlspecialchars($producto['nombre']) ?></p>
+                            
+                            <div class="prices-container">
+                                <?php if ($producto['ofertas']): ?>
+                                    <del class="original-price"><?= number_format($producto['precio_original'], 2) ?> €</del>
+                                    <span class="sale-price"><?= number_format($producto['precio_oferta'], 2) ?> €</span>
+                                <?php else: ?>
+                                    <p class="producto-precio"><?= number_format($producto['precio'], 2) ?> €</p>
+                                <?php endif; ?>
+                            </div>
 
-                                <form action="cesta.php" method="post">
-                                    <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
-                                    <button type="submit" class="add-to-cart-btn">AÑADIR A LA CESTA</button>
-                                </form>
-                            </div> 
-                        <?php endforeach; ?>
-                    <?php endif; ?>
+                            <form action="cesta.php" method="post">
+                                <input type="hidden" name="producto_id" value="<?= $producto['id'] ?>">
+                                <button type="submit" class="add-to-cart-btn">AÑADIR A LA CESTA</button>
+                            </form>
+                        </div> 
+                    <?php endforeach; ?>
 
                 </div>
             </div>
@@ -138,56 +146,19 @@ foreach ($productos_todos as $p) {
 </main>
 
 <footer>
-    <p>&copy; Tienda de Magia 2025. Todos los derechos reservados.</p>
+    <p>&copy; Tienda de Magia 2026. AWS RDS Cloud Version.</p>
 </footer>
 
 <script>
 $(document).ready(function() {
+    // Lógica de filtrado en tiempo real
     $('#buscar-nombre').on('keyup', function() {
         let texto = $(this).val().toLowerCase();
         
-        // Filtrar cards de productos
         $('.producto-card').each(function() {
             let nombre = $(this).data('nombre');
             $(this).toggle(nombre.includes(texto));
         });
-
-        // Sugerencias de autocompletado
-        if (texto.length > 0) {
-            let sugerenciasHtml = '<ul>';
-            let encontradas = 0;
-
-            $('.producto-nombre').each(function() {
-                let nombre = $(this).text();
-                if (nombre.toLowerCase().includes(texto) && encontradas < 5) {
-                    sugerenciasHtml += '<li>' + nombre + '</li>';
-                    encontradas++;
-                }
-            });
-            sugerenciasHtml += '</ul>';
-
-            if (encontradas > 0) {
-                $('#sugerencias').html(sugerenciasHtml).fadeIn(200);
-            } else {
-                $('#sugerencias').hide();
-            }
-        } else {
-            $('#sugerencias').fadeOut(200);
-        }
-    });
-
-    // Seleccionar sugerencia
-    $(document).on('click', '#sugerencias li', function() {
-        $('#buscar-nombre').val($(this).text());
-        $('#sugerencias').fadeOut(200);
-        $('#buscar-nombre').trigger('keyup'); 
-    });
-
-    // Cerrar al hacer clic fuera
-    $(document).on('click', function(e) {
-        if (!$(e.target).closest('.search-wrapper').length) {
-            $('#sugerencias').hide();
-        }
     });
 });
 </script>
