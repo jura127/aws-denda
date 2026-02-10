@@ -2,27 +2,21 @@
 // ASUMIMOS que la clase Mensajes está definida y disponible
 // Y que la conexión a SQLite se gestiona internamente.
 class MensajesDB {
-    // Definición de la ruta a la DB de mensajes
-    private const DB_PATH = __DIR__ . '/mensajes.db'; 
+    private const DB_HOST = 'erronka.c9ig24qucwtm.eu-south-2.rds.amazonaws.com';
+    private const DB_USER = 'admin';
+    private const DB_PASS = 'Unaijurado23';
+    private const DB_NAME = 'erronka';
 
-    // Conexión y Creación de la Tabla 'mensajes'
+
+    // Conexión a la base de datos MySQL
     private static function konektatu(): PDO {
         try {
-            $db = new PDO("sqlite:" . self::DB_PATH);
+            $dsn = "mysql:host=" . self::DB_HOST . ";dbname=" . self::DB_NAME . ";charset=utf8mb4";
+            $db = new PDO($dsn, self::DB_USER, self::DB_PASS);
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Crear tabla si no existe
-            $db->exec("CREATE TABLE IF NOT EXISTS mensajes (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                email TEXT NOT NULL,
-                mensaje TEXT NOT NULL,
-                fecha DATETIME DEFAULT CURRENT_TIMESTAMP,
-                leido INTEGER DEFAULT 0 
-            )");
             return $db;
         } catch (PDOException $e) {
-            die("Error de conexión a mensajes.db: " . $e->getMessage());
+            die("Error de conexión a mensajes: " . $e->getMessage());
         }
     }
 // ---------------------------------------------------------------------

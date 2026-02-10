@@ -1,21 +1,25 @@
 <?php
 class CategoriasDB {
-    private const DB_PATH = __DIR__ . '/categorias.db';
+    private const DB_HOST = 'erronka.c9ig24qucwtm.eu-south-2.rds.amazonaws.com';
+    private const DB_USER = 'admin';
+    private const DB_PASS = 'Unaijurado23';
+    private const DB_NAME = 'erronka';
+
 
     private static function konektatu(): PDO {
-        $db = new PDO("sqlite:" . self::DB_PATH);
-        $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        return $db;
+        try {
+            $dsn = "mysql:host=" . self::DB_HOST . ";dbname=" . self::DB_NAME . ";charset=utf8mb4";
+            $db = new PDO($dsn, self::DB_USER, self::DB_PASS);
+            $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+            return $db;
+        } catch (PDOException $e) {
+            die("Error de conexión a DB: " . $e->getMessage());
+        }
     }
 
     // Crear tabla si no existe
     public static function crearTablaSiNoExiste() {
-        $db = self::konektatu();
-        $sql = "CREATE TABLE IF NOT EXISTS categorias (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            nombre TEXT NOT NULL
-        )";
-        $db->exec($sql);
+        // Las tablas ya deben existir en MySQL
     }
 
     public static function selectCategorias(): array {

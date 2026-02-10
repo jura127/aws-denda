@@ -1,27 +1,21 @@
 <?php
 // ASUMIMOS que la clase Pedido está definida y disponible
 class PedidosDB {
-    private const DB_PATH = __DIR__ . '/pedidos.db';
+    private const DB_HOST = 'erronka.c9ig24qucwtm.eu-south-2.rds.amazonaws.com';
+    private const DB_USER = 'admin';
+    private const DB_PASS = 'Unaijurado23';
+    private const DB_NAME = 'erronka';
 
-    // Conexión y Creación de la Tabla 'pedidos'
+
+    // Conexión a la base de datos MySQL
     private static function konektatu(): PDO {
         try {
-            $db = new PDO("sqlite:" . self::DB_PATH);
+            $dsn = "mysql:host=" . self::DB_HOST . ";dbname=" . self::DB_NAME . ";charset=utf8mb4";
+            $db = new PDO($dsn, self::DB_USER, self::DB_PASS);
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            
-            // Crear tabla si no existe (incluida en konektatu, como en el ejemplo)
-            $db->exec("CREATE TABLE IF NOT EXISTS pedidos (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                nombre TEXT NOT NULL,
-                email TEXT NOT NULL,
-                producto TEXT NOT NULL,
-                cantidad INTEGER DEFAULT 1,
-                estado TEXT DEFAULT 'Nuevo',
-                fecha DATETIME DEFAULT CURRENT_TIMESTAMP
-            )");
             return $db;
         } catch (PDOException $e) {
-            die("Error de conexión a pedidos.db: " . $e->getMessage());
+            die("Error de conexión a pedidos: " . $e->getMessage());
         }
     }
 // ---------------------------------------------------------------------

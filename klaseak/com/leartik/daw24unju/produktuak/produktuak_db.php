@@ -1,24 +1,16 @@
 <?php
 class ProductosDB {
-    private const DB_PATH = __DIR__ . '/productos.db';
+    private const DB_HOST = 'erronka.c9ig24qucwtm.eu-south-2.rds.amazonaws.com';
+    private const DB_USER = 'admin';
+    private const DB_PASS = 'Unaijurado23';
+    private const DB_NAME = 'erronka';
 
-    // Conexión a la base de datos SQLite
+    // Conexión a la base de datos MySQL
     private static function konektatu(): PDO {
         try {
-            $db = new PDO("sqlite:" . self::DB_PATH);
+            $dsn = "mysql:host=" . self::DB_HOST . ";dbname=" . self::DB_NAME . ";charset=utf8mb4";
+            $db = new PDO($dsn, self::DB_USER, self::DB_PASS);
             $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-            // Crear tabla si no existe
-            $db->exec("CREATE TABLE IF NOT EXISTS productos (
-                id_producto INTEGER PRIMARY KEY AUTOINCREMENT,
-                tipo_producto TEXT NOT NULL,
-                descripcion TEXT NOT NULL,
-                precio REAL NOT NULL,
-                id_categoria INTEGER NOT NULL,
-                video TEXT,
-                tiene_opc_añadir_cesta INTEGER DEFAULT 0,
-                ofertas INTEGER DEFAULT 0,
-                novedades INTEGER DEFAULT 0
-            )");
             return $db;
         } catch (PDOException $e) {
             die("Error de conexión a DB: " . $e->getMessage());
