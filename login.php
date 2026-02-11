@@ -142,6 +142,7 @@ $nombre_usuario = $_SESSION['nombre_usuario'] ?? 'Invitado';
             <li><a href="catalogo.php">Catálogo</a></li>
             <li><a href="accesorios.php">Accesorios</a></li>
             <li><a href="contacto/index.php">Contacto</a></li>
+            <li><a href="mediateka/mediateka.html">Mediateka</a></li>
             <li><a href="cesta.php">Cesta</a></li>
             <li>
                 <?php if ($esta_logueado): ?>

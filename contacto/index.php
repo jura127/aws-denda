@@ -51,12 +51,12 @@ if (isset($_POST['izena']) && isset($_POST['email']) && isset($_POST['mezuaren_t
     </div>
     <nav class="main-nav">
         <ul>
-            <li><a href="index.php" >Inicio</a></li>
-            <li><a href="catalogo.php">Catálogo</a></li>
-            <li><a href="accesorios.php">Accesorios</a></li>
+            <li><a href="../index.php" >Inicio</a></li>
+            <li><a href="../catalogo.php">Catálogo</a></li>
+            <li><a href="../accesorios.php">Accesorios</a></li>
             <li><a href="contacto/index.php"  class="active">Contacto</a></li>
-            <li><a href="mediateka/mediateka.html">Mediateka</a></li>
-            <li><a href="cesta.php">Cesta</a></li>
+            <li><a href="../mediateka/mediateka.html">Mediateka</a></li>
+            <li><a href="../cesta.php">Cesta</a></li>
             <li>
                 <?php if ($esta_logueado): ?>
                     <div class="user-info-nav">
@@ -65,7 +65,7 @@ if (isset($_POST['izena']) && isset($_POST['email']) && isset($_POST['mezuaren_t
                         
                     </div>
                 <?php else: ?>
-                    <a href="login.php">Login/Reg</a>
+                    <a href="../login.php">Login/Reg</a>
                 <?php endif; ?>
             </li>
         </ul>
