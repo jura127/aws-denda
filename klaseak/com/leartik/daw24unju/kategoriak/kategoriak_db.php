@@ -3,7 +3,7 @@ class CategoriasDB {
     private const DB_HOST = 'erronka.c9ig24qucwtm.eu-south-2.rds.amazonaws.com';
     private const DB_USER = 'admin';
     private const DB_PASS = 'Unaijurado23';
-    private const DB_NAME = 'mysql';
+    private const DB_NAME = 'erronka';
 
 
     private static function konektatu(): PDO {
